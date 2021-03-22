@@ -34,5 +34,5 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: result-${{ env.BRANCH }}.json
+          name: result-${{ env.BRANCH }}
           path: result.json
