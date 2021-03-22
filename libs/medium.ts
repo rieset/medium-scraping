@@ -24,7 +24,7 @@ export class Medium {
 
     const $ = cheerio.load(html);
 
-    $('meta[name=title]').each(function() {
+    $("meta[property='twitter:title']").each(function() {
       article.title = this.attribs.content;
     });
 
@@ -37,7 +37,7 @@ export class Medium {
     });
 
     $("meta[property='article:published_time']").each(function() {
-      article.poster = this.attribs.content;
+      article.publishedAt = this.attribs.content;
     });
 
     $("article section").eq(1).each(function() {
