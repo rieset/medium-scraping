@@ -4,6 +4,8 @@ on: push
 
 env:
   CONFIGFILE: ${{ secrets.CONFIGFILE }}
+  START: 0
+  STOP: 3000
 
 jobs:
   Scraping:

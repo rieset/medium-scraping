@@ -5,6 +5,7 @@ import {
 } from './scraping.model';
 import {youtube} from './libs/youtube';
 import {medium} from './libs/medium';
+import {twitter} from './libs/twitter';
 
 const puppeteer = require('puppeteer');
 const tress = require('tress');
@@ -31,20 +32,28 @@ export class Scraping {
     parserType: youtube.parserType,
     parser: youtube.parser,
     test: youtube.subscribe
-  }]
+  }, {
+      parserType: twitter.parserType,
+      parser: twitter.parser,
+      test: twitter.subscribe
+    }
+  ]
 
   constructor() {
     this.queue.concurrency = -1000;
   }
 
-  public async start (list: ScrapingInputModel[]): Promise<any[]> {
-    log.start('Articles list %s, Success articles %s, Failed articles %s, Skipped articles %s.');
-    log.step(list.length, 0, 0);
+  public async start (list: ScrapingInputModel[], start, finish): Promise<any[]> {
+    const subList = list.slice(start, finish);
+
+    log.start('Articles list %s, Success articles %s, Failed articles %s, Skipped articles %s, All articles %s.');
+    log.step(subList.length, 0, 0, start, list.length);
 
     this.browser = await puppeteer.launch();
     this.page = await this.browser.newPage();
+    await this.page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36');
 
-    this.queue.push(list);
+    this.queue.push(subList);
 
     return new Promise((done) => {
       this.queue.drain = () => {
@@ -123,7 +132,7 @@ export class Scraping {
 
   async usePuppeteer(link: string): Promise<string> {
     await this.page.goto(link, {
-      waitUntil: 'networkidle2',
+      waitUntil: 'networkidle0',
     });
     const htmlHandle = await this.page.$('html');
     return await this.page.evaluate(body => body.innerHTML, htmlHandle);

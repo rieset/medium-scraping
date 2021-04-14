@@ -1,0 +1,40 @@
+name: Scraping
+
+on: push
+
+env:
+  CONFIGFILE: ${{ secrets.CONFIGFILE }}
+  START: 21000
+  STOP: 24000
+
+jobs:
+  Scraping:
+    runs-on: ubuntu-latest
+    if: contains( github.ref, 'refs/tags/') == false
+    continue-on-error: true
+    steps:
+      - name: Set ENV
+        run: echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.4.1
+        with:
+          access_token: ${{ secrets.github_token }}
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install
+        run: yarn install
+
+      - name: Parse
+        run: ./node_modules/.bin/ts-node index.ts
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: result-${{ env.BRANCH }}-21000
+          path: result.json
